@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DayZ Mutant Spawn System - Creator & Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #36393f;
+            min-height: 100vh;
+            color: #dcddde;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: #2f3136;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 0;
+        }
+
+        .tabs {
+            display: flex;
+            background: #40444b;
+            border-bottom: 2px solid #202225;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #40444b;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-right: 1px solid #202225;
+            color: #dcddde;
+        }
+
+        .tab.active {
+            background: #5865f2;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #36393f;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #dcddde;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #40444b;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #40444b;
+            color: #dcddde;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #5865f2;
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #3ba55c, #2d7d32);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ed4245, #c62828);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: #36393f;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #40444b;
+        }
+
+        .card-header {
+            background: #40444b;
+            padding: 15px 20px;
+            border-bottom: 1px solid #202225;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .card-header:hover {
+            background: #42464d;
+        }
+
+        .card-header .collapse-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .card-body {
+            padding: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card-body.collapsed {
+            display: none;
+        }
+
+        .spawn-point {
+            border: 2px solid #40444b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            background: #40444b;
+        }
+
+        .spawn-point-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #202225;
+        }
+
+        .remove-spawn-point {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ed4245;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .tier-item {
+            background: #36393f;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #40444b;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .classname-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .classname-tag {
+            background: #5865f2;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .classname-tag .remove-classname {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .validation-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            max-width: 300px;
+        }
+
+        .validation-status.valid {
+            background: #3ba55c;
+        }
+
+        .validation-status.invalid {
+            background: #ed4245;
+        }
+
+        .validation-details {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: #2f3136;
+            border: 2px solid #ed4245;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 400px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            display: none;
+        }
+
+        .validation-details h4 {
+            color: #ed4245;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .validation-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .validation-details li {
+            background: #40444b;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            border-left: 3px solid #ed4245;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .validation-details li:hover {
+            background: #36393f;
+        }
+
+        .vpp-converter {
+            background: #faa61a;
+            border: 1px solid #f57c00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .vpp-converter h3 {
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .vpp-converter input {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #f57c00;
+        }
+
+        .download-section {
+            background: #3ba55c;
+            border: 1px solid #2d7d32;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .preview-section {
+            background: #40444b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-code {
+            background: #202225;
+            color: #dcddde;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error-message {
+            background: #ed4245;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background: #3ba55c;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: #202225;
+            color: #dcddde;
+            padding: 20px 30px;
+            text-align: center;
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .discord-link {
+            background: #7289da;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .discord-link:hover {
+            background: #5865f2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧟 DayZ Mutant Spawn System - Creator & Editor</h1>
+            <p>Create, edit and validate Zones.json and Tiers.json files for the MutantSpawnSystem mod</p>
+        </div>
+
+        <div class="validation-status" id="validationStatus" style="display: none;" onclick="toggleValidationDetails()">
+            ✓ All valid
+        </div>
+
+        <div class="validation-details" id="validationDetails">
+            <h4>Validation Errors</h4>
+            <ul id="errorList"></ul>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('zones')">Zone Creator</button>
+                <button class="tab" onclick="switchTab('tiers')">Tier Creator</button>
+                <button class="tab" onclick="switchTab('vpp')">VPP Converter</button>
+                <button class="tab" onclick="switchTab('import')">Import/Export</button>
+                <button class="tab" onclick="switchTab('preview')">Preview & Download</button>
+            </div>
+
+            <!-- Zone Creator Tab -->
+            <div id="zones" class="tab-content active">
+                <div class="vpp-converter">
+                    <h3>Quick VPP Position Fix</h3>
+                    <div class="form-row">
+                        <input type="text" id="vppQuickInput" placeholder="Paste VPP coordinates: 3795.881836, 43.872143, 1488.775269" style="background: white; color: #1a1a1a;">
+                        <button class="btn btn-secondary" onclick="convertVPPQuick()">Convert to Spaces</button>
+                    </div>
+                    <div id="vppQuickResult" style="margin-top: 10px; font-family: monospace;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>Global Settings</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>System Enabled</label>
+                                <select id="systemEnabled">
+                                    <option value="1">Enabled (1)</option>
+                                    <option value="0">Disabled (0)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Check Interval (seconds)</label>
+                                <input type="number" id="checkInterval" value="15.0" step="0.1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Max Entities Per Zone</label>
+                                <input type="number" id="maxEntitiesPerZone" value="20" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Entity Lifetime (seconds)</label>
+                                <input type="number" id="entityLifetime" value="600" min="60">
+                            </div>
+                            <div class="form-group">
+                                <label>Min Spawn Distance From Player</label>
+                                <input type="number" id="minSpawnDistanceFromPlayer" value="30.0" step="0.1" min="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>Zones</span>
+                        <button class="btn btn-success btn-small" onclick="addZone()">Add New Zone</button>
+                    </div>
+                    <div class="card-body" id="zonesList">
+                        <!-- Zones will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier Creator Tab -->
+            <div id="tiers" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <span>Tiers Configuration</span>
+                        <button class="btn btn-success btn-small" onclick="addTier()">Add New Tier</button>
+                    </div>
+                    <div class="card-body" id="tiersList">
+                        <!-- Tiers will be added here -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>Common DayZ Classnames Reference</span>
+                    </div>
+                    <div class="card-body">
+                        <h4>Zombies:</h4>
+                        <p><code>ZmbM_HunterOld_Autumn, ZmbM_HunterOld_Spring, ZmbF_SurvivorNormal_Blue, ZmbM_SoldierNormal, ZmbM_PatrolNormal_PautRev</code></p>
+                        <h4 style="margin-top: 15px;">Animals:</h4>
+                        <p><code>Animal_UrsusArctos, Animal_CanisLupus_Grey, Animal_CanisLupus_White, Animal_SusScrofa</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VPP Converter Tab -->
+            <div id="vpp" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <span>VPP Admin Tool Coordinate Converter</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Paste coordinates from VPP Admin Tool that have commas and convert them to space-separated format for DayZ JSON files.</p>
+                        
+                        <div class="form-group">
+                            <label>VPP Coordinates (with commas)</label>
+                            <textarea id="vppInput" rows="10" placeholder="Paste your VPP coordinates here, one per line:
+3795.881836, 43.872143, 1488.775269
+4500.123456, 342.567890, 10500.987654
+1800.000000, 15.000000, 3200.000000"></textarea>
+                        </div>
+
+                        <button class="btn" onclick="convertVPPCoordinates()">Convert All Coordinates</button>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Converted Coordinates (space-separated)</label>
+                            <textarea id="vppOutput" rows="10" readonly placeholder="Converted coordinates will appear here..."></textarea>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-secondary" onclick="copyToClipboard('vppOutput')">Copy Converted Coordinates</button>
+                            <button class="btn btn-secondary" onclick="clearVPPConverter()">Clear All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import/Export Tab -->
+            <div id="import" class="tab-content">
+                <div class="form-row">
+                    <div class="card" style="flex: 1;">
+                        <div class="card-header">
+                            <span>Import Existing Files</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Upload Zones.json</label>
+                                <input type="file" id="zonesFileInput" accept=".json" onchange="importZonesFile(event)">
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Tiers.json</label>
+                                <input type="file" id="tiersFileInput" accept=".json" onchange="importTiersFile(event)">
+                            </div>
+                            <div id="importStatus"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1;">
+                        <div class="card-header">
+                            <span>Quick Actions</span>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-success" onclick="loadSampleData()" style="width: 100%; margin-bottom: 10px;">Load Sample Data</button>
+                            <button class="btn btn-secondary" onclick="clearAllData()" style="width: 100%; margin-bottom: 10px;">Clear All Data</button>
+                            <button class="btn btn-danger" onclick="resetToDefaults()" style="width: 100%;">Reset to Defaults</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview & Download Tab -->
+            <div id="preview" class="tab-content">
+                <div class="form-row">
+                    <div class="card" style="flex: 1;">
+                        <div class="card-header">
+                            <span>Zones.json Preview</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-code" id="zonesPreview"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1;">
+                        <div class="card-header">
+                            <span>Tiers.json Preview</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-code" id="tiersPreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-section">
+                    <h3>Download Your Configuration Files</h3>
+                    <p>Your files are automatically validated before download. Fix any errors shown above before downloading.</p>
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="downloadZones()">Download Zones.json</button>
+                        <button class="btn" onclick="downloadTiers()">Download Tiers.json</button>
+                        <button class="btn btn-success" onclick="downloadBoth()">Download Both Files</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div>Created by <strong>Exodus DayZ Forge</strong> | MutantSpawnSystem Creator & Editor v1.0</div>
+            <a href="https://discord.gg/Yz8S558D6M" target="_blank" class="discord-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0002 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9554 2.4189-2.1568 2.4189Z"/>
+                </svg>
+                Join Discord
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        // Global data structures
+        let zonesData = {
+            globalSettings: {
+                systemEnabled: 1,
+                checkInterval: 15.0,
+                maxEntitiesPerZone: 20,
+                entityLifetime: 600,
+                minSpawnDistanceFromPlayer: 30.0
+            },
+            zones: []
+        };
+
+        let tiersData = {
+            tiers: {}
+        };
+
+        // UI state
+        let collapsedZones = new Set();
+        let collapsedTiers = new Set();
+        let currentErrors = [];
+
+        // Toggle validation details
+        function toggleValidationDetails() {
+            const details = document.getElementById('validationDetails');
+            const isVisible = details.style.display === 'block';
+            details.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Collapse/expand functionality
+        function toggleZoneCollapse(zoneIndex) {
+            const body = document.querySelector(`#zone_${zoneIndex} .card-body`);
+            const header = document.querySelector(`#zone_${zoneIndex} .card-header`);
+            const icon = document.querySelector(`#zone_${zoneIndex} .collapse-icon`);
+            
+            if (collapsedZones.has(zoneIndex)) {
+                collapsedZones.delete(zoneIndex);
+                body.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                collapsedZones.add(zoneIndex);
+                body.classList.add('collapsed');
+                header.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
+
+        function toggleTierCollapse(tierId) {
+            const body = document.querySelector(`#tier_${tierId} .card-body`);
+            const header = document.querySelector(`#tier_${tierId} .card-header`);
+            const icon = document.querySelector(`#tier_${tierId} .collapse-icon`);
+            
+            if (collapsedTiers.has(tierId)) {
+                collapsedTiers.delete(tierId);
+                body.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                collapsedTiers.add(tierId);
+                body.classList.add('collapsed');
+                header.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
+
+        // Auto-collapse other items when adding new ones
+        function autoCollapseZones(excludeIndex = -1) {
+            zonesData.zones.forEach((_, index) => {
+                if (index !== excludeIndex) {
+                    collapsedZones.add(index);
+                }
+            });
+        }
+
+        function autoCollapseTiers(excludeId = null) {
+            Object.keys(tiersData.tiers).forEach(tierId => {
+                if (tierId !== excludeId) {
+                    collapsedTiers.add(tierId);
+                }
+            });
+        }
+
+        // Validation functions (reused from validator)
+        function validatePosition(position) {
+            if (typeof position !== 'string') {
+                return { valid: false, error: 'Position must be a string' };
+            }
+            
+            const trimmed = position.trim();
+            if (trimmed.length === 0) {
+                return { valid: false, error: 'Position cannot be empty' };
+            }
+            
+            let coords = trimmed.split(/[\s,]+/).filter(coord => coord.length > 0);
+            
+            if (coords.length !== 3) {
+                return { 
+                    valid: false, 
+                    error: `Position must have exactly 3 coordinates, found ${coords.length}`
+                };
+            }
+            
+            const allErrors = [];
+            for (let i = 0; i < coords.length; i++) {
+                const coord = coords[i];
+                const coordName = ['X', 'Y', 'Z'][i];
+                const validation = validateSingleCoordinate(coord, coordName);
+                
+                if (!validation.valid) {
+                    allErrors.push(`${coordName}: ${validation.error}`);
+                }
+            }
+            
+            if (allErrors.length > 0) {
+                return {
+                    valid: false,
+                    error: `Invalid coordinates - ${allErrors.join(', ')}`
+                };
+            }
+            
+            if (trimmed.includes(',')) {
+                return {
+                    valid: false,
+                    error: 'Use spaces instead of commas to separate coordinates'
+                };
+            }
+            
+            return { valid: true };
+        }
+
+        function validateSingleCoordinate(coord) {
+            if (coord.includes(',')) {
+                return { valid: false, error: `comma instead of decimal point in '${coord}'` };
+            }
+            
+            const dotCount = (coord.match(/\./g) || []).length;
+            if (dotCount > 1) {
+                return { valid: false, error: `multiple decimal points in '${coord}'` };
+            }
+            
+            const validCharPattern = /^[+-]?\d*\.?\d*$/;
+            if (!validCharPattern.test(coord)) {
+                const invalidChars = coord.split('').filter(char => !/[0-9+\-.]/g.test(char));
+                return { valid: false, error: `invalid characters: ${invalidChars.join(', ')} in '${coord}'` };
+            }
+            
+            if (coord === '' || coord === '.' || coord === '+' || coord === '-') {
+                return { valid: false, error: `invalid coordinate '${coord}'` };
+            }
+            
+            if (coord.startsWith('.') || coord.endsWith('.')) {
+                return { valid: false, error: `coordinate '${coord}' starts or ends with decimal point` };
+            }
+            
+            const num = parseFloat(coord);
+            if (isNaN(num) || !isFinite(num)) {
+                return { valid: false, error: `cannot parse '${coord}' as number` };
+            }
+            
+            return { valid: true };
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content and mark tab as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update previews when switching to preview tab
+            if (tabName === 'preview') {
+                updatePreviews();
+            }
+        }
+
+        // VPP Converter functions
+        function convertVPPQuick() {
+            const input = document.getElementById('vppQuickInput');
+            const result = document.getElementById('vppQuickResult');
+            const coordinates = input.value.trim();
+            
+            if (coordinates) {
+                const converted = coordinates.replace(/,\s*/g, ' ');
+                result.innerHTML = `<strong>Converted:</strong> ${converted}`;
+                result.style.color = '#3ba55c';
+                
+                // Copy to clipboard
+                navigator.clipboard.writeText(converted).then(() => {
+                    result.innerHTML += ' <em>(copied to clipboard)</em>';
+                });
+            } else {
+                result.innerHTML = '<strong>Please enter coordinates first</strong>';
+                result.style.color = '#ed4245';
+            }
+        }
+
+        function convertVPPCoordinates() {
+            const input = document.getElementById('vppInput').value;
+            const output = document.getElementById('vppOutput');
+            
+            if (!input.trim()) {
+                alert('Please enter some coordinates first.');
+                return;
+            }
+            
+            const lines = input.trim().split('\n');
+            const converted = lines.map(line => {
+                return line.trim().replace(/,\s*/g, ' ');
+            }).join('\n');
+            
+            output.value = converted;
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const originalValue = element.value;
+            element.value = 'Copied to clipboard!';
+            setTimeout(() => {
+                element.value = originalValue;
+            }, 1000);
+        }
+
+        function clearVPPConverter() {
+            document.getElementById('vppInput').value = '';
+            document.getElementById('vppOutput').value = '';
+            document.getElementById('vppQuickInput').value = '';
+            document.getElementById('vppQuickResult').innerHTML = '';
+        }
+
+        // Zone management functions
+        let zoneCounter = 0;
+
+        function addZone() {
+            zoneCounter++;
+            const zone = {
+                name: `Zone_${zoneCounter}`,
+                enabled: 1,
+                position: "0 0 0",
+                triggerRadius: 100,
+                spawnChance: 1.0,
+                despawnOnExit: 1,
+                despawnDistance: 150,
+                respawnCooldown: 300,
+                spawnPoints: []
+            };
+            
+            // Auto-collapse other zones
+            autoCollapseZones();
+            
+            zonesData.zones.push(zone);
+            renderZones();
+        }
+
+        function removeZone(index) {
+            if (confirm('Are you sure you want to remove this zone?')) {
+                zonesData.zones.splice(index, 1);
+                renderZones();
+            }
+        }
+
+        function addSpawnPoint(zoneIndex) {
+            const spawnPoint = {
+                position: "0 0 0",
+                radius: 5.0,
+                tierIds: [1],
+                entities: 3,
+                useFixedHeight: 0
+            };
+            
+            zonesData.zones[zoneIndex].spawnPoints.push(spawnPoint);
+            renderZones();
+        }
+
+        function removeSpawnPoint(zoneIndex, spIndex) {
+            zonesData.zones[zoneIndex].spawnPoints.splice(spIndex, 1);
+            renderZones();
+        }
+
+        function renderZones() {
+            const container = document.getElementById('zonesList');
+            container.innerHTML = '';
+            
+            zonesData.zones.forEach((zone, zoneIndex) => {
+                const isCollapsed = collapsedZones.has(zoneIndex);
+                const zoneDiv = document.createElement('div');
+                zoneDiv.className = 'card';
+                zoneDiv.id = `zone_${zoneIndex}`;
+                zoneDiv.innerHTML = `
+                    <div class="card-header ${isCollapsed ? 'collapsed' : ''}" onclick="toggleZoneCollapse(${zoneIndex})">
+                        <span>Zone: ${zone.name}</span>
+                        <div>
+                            <span class="collapse-icon">${isCollapsed ? '▶' : '▼'}</span>
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); removeZone(${zoneIndex})" style="margin-left: 10px;">Remove Zone</button>
+                        </div>
+                    </div>
+                    <div class="card-body ${isCollapsed ? 'collapsed' : ''}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Zone Name</label>
+                                <input type="text" value="${zone.name}" onchange="updateZone(${zoneIndex}, 'name', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Enabled</label>
+                                <select onchange="updateZone(${zoneIndex}, 'enabled', parseInt(this.value))">
+                                    <option value="1" ${zone.enabled === 1 ? 'selected' : ''}>Yes (1)</option>
+                                    <option value="0" ${zone.enabled === 0 ? 'selected' : ''}>No (0)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Position (X Y Z)</label>
+                                <input type="text" value="${zone.position}" onchange="updateZone(${zoneIndex}, 'position', this.value)" placeholder="1234.5 10.0 5678.9">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Trigger Radius</label>
+                                <input type="number" value="${zone.triggerRadius}" onchange="updateZone(${zoneIndex}, 'triggerRadius', parseFloat(this.value))" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>Spawn Chance</label>
+                                <input type="number" value="${zone.spawnChance}" onchange="updateZone(${zoneIndex}, 'spawnChance', parseFloat(this.value))" step="0.1" min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Despawn On Exit</label>
+                                <select onchange="updateZone(${zoneIndex}, 'despawnOnExit', parseInt(this.value))">
+                                    <option value="1" ${zone.despawnOnExit === 1 ? 'selected' : ''}>Yes (1)</option>
+                                    <option value="0" ${zone.despawnOnExit === 0 ? 'selected' : ''}>No (0)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Despawn Distance</label>
+                                <input type="number" value="${zone.despawnDistance}" onchange="updateZone(${zoneIndex}, 'despawnDistance', parseFloat(this.value))" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>Respawn Cooldown</label>
+                                <input type="number" value="${zone.respawnCooldown}" onchange="updateZone(${zoneIndex}, 'respawnCooldown', parseFloat(this.value))" step="0.1">
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 20px 0 15px 0;">Spawn Points</h4>
+                        <button class="btn btn-success btn-small" onclick="addSpawnPoint(${zoneIndex})">Add Spawn Point</button>
+                        
+                        <div id="spawnPoints_${zoneIndex}">
+                            ${zone.spawnPoints.map((sp, spIndex) => `
+                                <div class="spawn-point">
+                                    <button class="remove-spawn-point" onclick="removeSpawnPoint(${zoneIndex}, ${spIndex})">×</button>
+                                    <div class="spawn-point-header">
+                                        <strong>Spawn Point ${spIndex + 1}</strong>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Position (X Y Z)</label>
+                                            <input type="text" value="${sp.position}" onchange="updateSpawnPoint(${zoneIndex}, ${spIndex}, 'position', this.value)" placeholder="1234.5 10.0 5678.9">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Radius</label>
+                                            <input type="number" value="${sp.radius}" onchange="updateSpawnPoint(${zoneIndex}, ${spIndex}, 'radius', parseFloat(this.value))" step="0.1" min="0.1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Entities</label>
+                                            <input type="number" value="${sp.entities}" onchange="updateSpawnPoint(${zoneIndex}, ${spIndex}, 'entities', parseInt(this.value))" min="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Use Fixed Height</label>
+                                            <select onchange="updateSpawnPoint(${zoneIndex}, ${spIndex}, 'useFixedHeight', parseInt(this.value))">
+                                                <option value="0" ${sp.useFixedHeight === 0 ? 'selected' : ''}>No (0)</option>
+                                                <option value="1" ${sp.useFixedHeight === 1 ? 'selected' : ''}>Yes (1)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tier IDs (comma-separated)</label>
+                                        <input type="text" value="${sp.tierIds.join(', ')}" onchange="updateSpawnPointTiers(${zoneIndex}, ${spIndex}, this.value)" placeholder="1, 2, 3">
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(zoneDiv);
+            });
+        }
+
+        function updateZone(zoneIndex, field, value) {
+            zonesData.zones[zoneIndex][field] = value;
+            validateData();
+        }
+
+        function updateSpawnPoint(zoneIndex, spIndex, field, value) {
+            zonesData.zones[zoneIndex].spawnPoints[spIndex][field] = value;
+            validateData();
+        }
+
+        function updateSpawnPointTiers(zoneIndex, spIndex, value) {
+            const tierIds = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            zonesData.zones[zoneIndex].spawnPoints[spIndex].tierIds = tierIds;
+            validateData();
+        }
+
+        // Tier management functions
+        let tierCounter = 0;
+
+        function addTier() {
+            tierCounter++;
+            const tierId = tierCounter.toString();
+            
+            // Auto-collapse other tiers
+            autoCollapseTiers();
+            
+            tiersData.tiers[tierId] = {
+                name: `Tier_${tierCounter}`,
+                classnames: []
+            };
+            renderTiers();
+        }
+
+        function removeTier(tierId) {
+            if (confirm('Are you sure you want to remove this tier?')) {
+                delete tiersData.tiers[tierId];
+                renderTiers();
+            }
+        }
+
+        function renderTiers() {
+            const container = document.getElementById('tiersList');
+            container.innerHTML = '';
+            
+            Object.keys(tiersData.tiers).forEach(tierId => {
+                const tier = tiersData.tiers[tierId];
+                const isCollapsed = collapsedTiers.has(tierId);
+                const tierDiv = document.createElement('div');
+                tierDiv.className = 'tier-item card';
+                tierDiv.id = `tier_${tierId}`;
+                tierDiv.innerHTML = `
+                    <div class="card-header ${isCollapsed ? 'collapsed' : ''}" onclick="toggleTierCollapse('${tierId}')">
+                        <span>Tier: ${tier.name}</span>
+                        <div>
+                            <span class="collapse-icon">${isCollapsed ? '▶' : '▼'}</span>
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); removeTier('${tierId}')" style="margin-left: 10px;">Remove Tier</button>
+                        </div>
+                    </div>
+                    <div class="card-body ${isCollapsed ? 'collapsed' : ''}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tier ID</label>
+                                <input type="number" value="${tierId}" onchange="updateTierId('${tierId}', this.value)" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Tier Name</label>
+                                <input type="text" value="${tier.name}" onchange="updateTier('${tierId}', 'name', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Add Classname</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="newClassname_${tierId}" placeholder="Enter classname (e.g., ZmbM_CitizenASkinny)">
+                                <button class="btn btn-secondary btn-small" onclick="addClassname('${tierId}')">Add</button>
+                            </div>
+                        </div>
+                        <div class="classname-list">
+                            ${tier.classnames.map((classname, index) => `
+                                <span class="classname-tag">
+                                    ${classname}
+                                    <span class="remove-classname" onclick="removeClassname('${tierId}', ${index})">×</span>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(tierDiv);
+            });
+        }
+
+        function updateTier(tierId, field, value) {
+            tiersData.tiers[tierId][field] = value;
+            validateData();
+        }
+
+        function updateTierId(oldId, newId) {
+            if (newId !== oldId && !tiersData.tiers[newId]) {
+                tiersData.tiers[newId] = tiersData.tiers[oldId];
+                delete tiersData.tiers[oldId];
+                renderTiers();
+                validateData();
+            }
+        }
+
+        function addClassname(tierId) {
+            const input = document.getElementById(`newClassname_${tierId}`);
+            const classname = input.value.trim();
+            
+            if (classname && !tiersData.tiers[tierId].classnames.includes(classname)) {
+                tiersData.tiers[tierId].classnames.push(classname);
+                input.value = '';
+                renderTiers();
+                validateData();
+            }
+        }
+
+        function removeClassname(tierId, index) {
+            tiersData.tiers[tierId].classnames.splice(index, 1);
+            renderTiers();
+            validateData();
+        }
+
+        // Data validation and management
+        function validateData() {
+            const errors = [];
+            currentErrors = []; // Reset detailed errors
+            
+            // Validate zones
+            zonesData.zones.forEach((zone, index) => {
+                if (!zone.name.trim()) {
+                    const error = `Zone ${index + 1}: Name is required`;
+                    errors.push(error);
+                    currentErrors.push({
+                        type: 'zone',
+                        index: index,
+                        field: 'name',
+                        message: error
+                    });
+                }
+                
+                const posValidation = validatePosition(zone.position);
+                if (!posValidation.valid) {
+                    const error = `Zone "${zone.name}": ${posValidation.error}`;
+                    errors.push(error);
+                    currentErrors.push({
+                        type: 'zone',
+                        index: index,
+                        field: 'position',
+                        message: error
+                    });
+                }
+                
+                zone.spawnPoints.forEach((sp, spIndex) => {
+                    const spPosValidation = validatePosition(sp.position);
+                    if (!spPosValidation.valid) {
+                        const error = `Zone "${zone.name}", Spawn Point ${spIndex + 1}: ${spPosValidation.error}`;
+                        errors.push(error);
+                        currentErrors.push({
+                            type: 'spawnpoint',
+                            zoneIndex: index,
+                            spIndex: spIndex,
+                            field: 'position',
+                            message: error
+                        });
+                    }
+                    
+                    if (!sp.tierIds || sp.tierIds.length === 0) {
+                        const error = `Zone "${zone.name}", Spawn Point ${spIndex + 1}: At least one Tier ID is required`;
+                        errors.push(error);
+                        currentErrors.push({
+                            type: 'spawnpoint',
+                            zoneIndex: index,
+                            spIndex: spIndex,
+                            field: 'tierIds',
+                            message: error
+                        });
+                    }
+                });
+            });
+            
+            // Validate tiers
+            Object.keys(tiersData.tiers).forEach(tierId => {
+                const tier = tiersData.tiers[tierId];
+                if (!tier.name.trim()) {
+                    const error = `Tier ${tierId}: Name is required`;
+                    errors.push(error);
+                    currentErrors.push({
+                        type: 'tier',
+                        id: tierId,
+                        field: 'name',
+                        message: error
+                    });
+                }
+                if (tier.classnames.length === 0) {
+                    const error = `Tier ${tierId}: At least one classname is required`;
+                    errors.push(error);
+                    currentErrors.push({
+                        type: 'tier',
+                        id: tierId,
+                        field: 'classnames',
+                        message: error
+                    });
+                }
+            });
+            
+            // Update validation status and error details
+            const status = document.getElementById('validationStatus');
+            const errorList = document.getElementById('errorList');
+            
+            if (errors.length === 0) {
+                status.className = 'validation-status valid';
+                status.textContent = '✓ All valid';
+                status.style.display = 'block';
+                document.getElementById('validationDetails').style.display = 'none';
+            } else {
+                status.className = 'validation-status invalid';
+                status.textContent = `${errors.length} error(s) - Click for details`;
+                status.style.display = 'block';
+                
+                // Update error list
+                errorList.innerHTML = '';
+                currentErrors.forEach(error => {
+                    const li = document.createElement('li');
+                    li.textContent = error.message;
+                    li.onclick = () => focusOnError(error);
+                    li.title = 'Click to focus on this field';
+                    errorList.appendChild(li);
+                });
+            }
+            
+            // Hide status after 3 seconds if valid
+            if (errors.length === 0) {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Focus on error field
+        function focusOnError(error) {
+            let targetTab = '';
+            
+            if (error.type === 'zone' || error.type === 'spawnpoint') {
+                targetTab = 'zones';
+                // Expand the zone if it's collapsed
+                if (collapsedZones.has(error.index || error.zoneIndex)) {
+                    toggleZoneCollapse(error.index || error.zoneIndex);
+                }
+            } else if (error.type === 'tier') {
+                targetTab = 'tiers';
+                // Expand the tier if it's collapsed
+                if (collapsedTiers.has(error.id)) {
+                    toggleTierCollapse(error.id);
+                }
+            }
+            
+            // Switch to the appropriate tab
+            switchTab(targetTab);
+            
+            // Hide validation details
+            document.getElementById('validationDetails').style.display = 'none';
+            
+            // Scroll to the problematic element
+            setTimeout(() => {
+                let selector = '';
+                if (error.type === 'zone') {
+                    selector = `#zone_${error.index}`;
+                } else if (error.type === 'spawnpoint') {
+                    selector = `#zone_${error.zoneIndex}`;
+                } else if (error.type === 'tier') {
+                    selector = `#tier_${error.id}`;
+                }
+                
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.boxShadow = '0 0 20px rgba(237, 66, 69, 0.8)';
+                    setTimeout(() => {
+                        element.style.boxShadow = '';
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        // Global settings update
+        function updateGlobalSettings() {
+            zonesData.globalSettings = {
+                systemEnabled: parseInt(document.getElementById('systemEnabled').value),
+                checkInterval: parseFloat(document.getElementById('checkInterval').value),
+                maxEntitiesPerZone: parseInt(document.getElementById('maxEntitiesPerZone').value),
+                entityLifetime: parseInt(document.getElementById('entityLifetime').value),
+                minSpawnDistanceFromPlayer: parseFloat(document.getElementById('minSpawnDistanceFromPlayer').value)
+            };
+            validateData();
+        }
+
+        // Add event listeners for global settings
+        document.addEventListener('DOMContentLoaded', function() {
+            ['systemEnabled', 'checkInterval', 'maxEntitiesPerZone', 'entityLifetime', 'minSpawnDistanceFromPlayer'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateGlobalSettings);
+            });
+        });
+
+        // File import/export functions
+        function importZonesFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    zonesData = data;
+                    
+                    // Update global settings inputs
+                    if (data.globalSettings) {
+                        document.getElementById('systemEnabled').value = data.globalSettings.systemEnabled;
+                        document.getElementById('checkInterval').value = data.globalSettings.checkInterval;
+                        document.getElementById('maxEntitiesPerZone').value = data.globalSettings.maxEntitiesPerZone;
+                        document.getElementById('entityLifetime').value = data.globalSettings.entityLifetime;
+                        document.getElementById('minSpawnDistanceFromPlayer').value = data.globalSettings.minSpawnDistanceFromPlayer;
+                    }
+                    
+                    renderZones();
+                    validateData();
+                    
+                    document.getElementById('importStatus').innerHTML = '<div class="success-message">Zones.json imported successfully!</div>';
+                } catch (error) {
+                    document.getElementById('importStatus').innerHTML = `<div class="error-message">Error importing Zones.json: ${error.message}</div>`;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function importTiersFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    tiersData = data;
+                    renderTiers();
+                    validateData();
+                    
+                    document.getElementById('importStatus').innerHTML = '<div class="success-message">Tiers.json imported successfully!</div>';
+                } catch (error) {
+                    document.getElementById('importStatus').innerHTML = `<div class="error-message">Error importing Tiers.json: ${error.message}</div>`;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadSampleData() {
+            // Sample zones data
+            zonesData = {
+                globalSettings: {
+                    systemEnabled: 1,
+                    checkInterval: 15.0,
+                    maxEntitiesPerZone: 20,
+                    entityLifetime: 600,
+                    minSpawnDistanceFromPlayer: 30.0
+                },
+                zones: [
+                    {
+                        name: "Test_Zone1",
+                        enabled: 1,
+                        position: "4500.5066 342.5688 10500.6488",
+                        triggerRadius: 200,
+                        spawnChance: 0.8,
+                        despawnOnExit: 1,
+                        despawnDistance: 300,
+                        respawnCooldown: 450,
+                        spawnPoints: [
+                            {
+                                position: "4505.56486 342.498 10505.486",
+                                radius: 5.0,
+                                tierIds: [2],
+                                entities: 4,
+                                useFixedHeight: 0
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            // Sample tiers data
+            tiersData = {
+                tiers: {
+                    "1": {
+                        name: "Basic Zombies",
+                        classnames: [
+                            "ZmbM_HunterOld_Autumn",
+                            "ZmbF_SurvivorNormal_Blue",
+                            "ZmbM_CitizenASkinny"
+                        ]
+                    },
+                    "2": {
+                        name: "Military Zombies",
+                        classnames: [
+                            "ZmbM_SoldierNormal",
+                            "ZmbM_PatrolNormal_PautRev"
+                        ]
+                    }
+                }
+            };
+
+            // Update UI
+            document.getElementById('systemEnabled').value = zonesData.globalSettings.systemEnabled;
+            document.getElementById('checkInterval').value = zonesData.globalSettings.checkInterval;
+            document.getElementById('maxEntitiesPerZone').value = zonesData.globalSettings.maxEntitiesPerZone;
+            document.getElementById('entityLifetime').value = zonesData.globalSettings.entityLifetime;
+            document.getElementById('minSpawnDistanceFromPlayer').value = zonesData.globalSettings.minSpawnDistanceFromPlayer;
+
+            renderZones();
+            renderTiers();
+            validateData();
+
+            document.getElementById('importStatus').innerHTML = '<div class="success-message">Sample data loaded successfully!</div>';
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                zonesData.zones = [];
+                tiersData.tiers = {};
+                renderZones();
+                renderTiers();
+                validateData();
+                
+                document.getElementById('importStatus').innerHTML = '<div class="success-message">All data cleared!</div>';
+            }
+        }
+
+        function resetToDefaults() {
+            if (confirm('Reset all settings to defaults? This will clear all your data.')) {
+                zonesData = {
+                    globalSettings: {
+                        systemEnabled: 1,
+                        checkInterval: 15.0,
+                        maxEntitiesPerZone: 20,
+                        entityLifetime: 600,
+                        minSpawnDistanceFromPlayer: 30.0
+                    },
+                    zones: []
+                };
+                
+                tiersData = { tiers: {} };
+                
+                // Reset UI
+                document.getElementById('systemEnabled').value = 1;
+                document.getElementById('checkInterval').value = 15.0;
+                document.getElementById('maxEntitiesPerZone').value = 20;
+                document.getElementById('entityLifetime').value = 600;
+                document.getElementById('minSpawnDistanceFromPlayer').value = 30.0;
+                
+                renderZones();
+                renderTiers();
+                validateData();
+                
+                document.getElementById('importStatus').innerHTML = '<div class="success-message">Reset to defaults!</div>';
+            }
+        }
+
+        // Preview and download functions
+        function updatePreviews() {
+            document.getElementById('zonesPreview').textContent = JSON.stringify(zonesData, null, 2);
+            document.getElementById('tiersPreview').textContent = JSON.stringify(tiersData, null, 2);
+        }
+
+        function downloadFile(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadZones() {
+            downloadFile(zonesData, 'Zones.json');
+        }
+
+        function downloadTiers() {
+            downloadFile(tiersData, 'Tiers.json');
+        }
+
+        function downloadBoth() {
+            downloadFile(zonesData, 'Zones.json');
+            setTimeout(() => downloadFile(tiersData, 'Tiers.json'), 500);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-validate on page load
+            validateData();
+        });
+    </script>
+</body>
+</html>
